@@ -4,6 +4,12 @@
     "indices": "data/train-data/gigaword/indices.npy",
     "model_dir": "data/models/gigaword-L8",
     "verbose": true,
+    "use_wandb": true,
+    "wandb": {
+        "project": "scrl",
+        "name": "gigaword-L8"
+    },
+    "use_tb": true,
     "print_every": 1,
     "eval_every": 50,
     "save_every": 50,

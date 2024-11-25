@@ -4,6 +4,12 @@
     "indices": "data/train-data/gigaword/indices.npy",
     "model_dir": "data/models/example",
     "verbose": true,
+    "use_wandb": true,
+    "wandb": {
+        "project": "scrl",
+        "name": "example"
+    },
+    "use_tb": true,
     "print_every": 1,
     "eval_every": 10,
     "save_every": 10,

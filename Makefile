@@ -1,5 +1,5 @@
 CONFIG ?= config/example.json
-DEVICE ?= cpu
+DEVICE ?= cuda
 MODELDIR ?= models/newsroom-P75/model-dirs/best_val_reward-7950
 TESTSET ?= data/test-data/broadcast.jsonl
 HC_OUTPUT ?= data/hc-outputs/hc.L11.google.jsonl

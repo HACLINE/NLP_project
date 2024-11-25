@@ -4,6 +4,12 @@
     "indices": "data/train-data/newsroom/indices.npy",
     "model_dir": "data/models/newsroom-L11",
     "verbose": true,
+    "use_wandb": true,
+    "wandb": {
+        "project": "scrl",
+        "name": "newsroom-L11"
+    },
+    "use_tb": true,
     "print_every": 1,
     "eval_every": 50,
     "save_every": 50,

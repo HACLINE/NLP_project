@@ -1,0 +1,1 @@
+python bin/train.py --verbose --config config/example.json --device cuda

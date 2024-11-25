@@ -15,5 +15,5 @@ unzip data.zip
 unzip all-distilroberta-v1.zip
 unzip distilroberta-base.zip
 unzip punkt.zip
-cp -r punkt ~/nltk_data
+cp -r punkt ~/nltk_data/tokenizers
 ```

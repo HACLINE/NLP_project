@@ -19,6 +19,8 @@ import torch
 from torch.nn.utils.rnn import pad_sequence
 from transformers import AutoModel, AutoTokenizer
 from sklearn import preprocessing
+import wandb
+from torch.utils.tensorboard import SummaryWriter
 
 from nltk import word_tokenize
 
@@ -50,7 +52,7 @@ class TrainingManager:
             loss.npy
             [...]
     """
-    def __init__(self, dir):
+    def __init__(self, dir, args):
         self.step = 0
         self.total_seconds = 0
         self.start_time = None
@@ -58,8 +60,24 @@ class TrainingManager:
         self.totals = defaultdict(float)
         self.dir = dir
         dir.mkdir(exist_ok=True)
-        for subdir_name in ("checkpoints", "series", "totals"):
+        for subdir_name in ("checkpoints", "series", "totals", "tb"):
             (dir / subdir_name).mkdir(exist_ok=True)
+
+        if args.use_tb:
+            self.tb_writer = SummaryWriter(str(dir / "tb"))
+        else:
+            self.tb_writer = None
+
+        self.wandb_run_id = None
+        if args.use_wandb:
+            wandb_id_file = dir / "wandb_run_id.json"
+            if wandb_id_file.exists():
+                self.wandb_run_id = utils.read_json(wandb_id_file)["id"]
+            
+            wandb.init(project=args.wandb["project"], config=args, resume="allow", id=self.wandb_run_id, dir=str(dir / "wandb"), name=args.wandb["name"])
+            self.wandb_run_id = wandb.run.id
+
+            utils.write_json({"id": self.wandb_run_id}, wandb_id_file)
 
     def start_clock(self):
         self.start_time = time.time() - self.total_seconds
@@ -81,6 +99,12 @@ class TrainingManager:
     def update_metric(self, key, value):
         self.totals[key] += value
         self.series[key].append(value)
+        
+        if self.tb_writer:
+            self.tb_writer.add_scalar(key, value, self.step)
+
+        if self.wandb_run_id:
+            wandb.log({key: value}, step=self.step)
 
     def mean_metric(self, key):
         return self.totals[key] / (self.step + 1)
@@ -185,7 +209,7 @@ def setup_model(args):
     model_dir = Path(args.model_dir)
     if args.fresh and model_dir.exists():
         utils.ask_rmdir(model_dir)
-    manager = TrainingManager(model_dir)
+    manager = TrainingManager(model_dir, args)
     if not manager.is_empty():
         manager.load()
 
@@ -194,7 +218,7 @@ def setup_model(args):
 
     # initialize new or load existing model
     if manager.step == 0:
-        encoder = AutoModel.from_pretrained(args.encoder_model_id)
+        encoder = AutoModel.from_pretrained(args.encoder_model_id).to(args.device)
         embedding_size = encoder.state_dict()["embeddings.word_embeddings.weight"].shape[1]
         model = LinearTokenSelector(encoder, embedding_size).to(args.device)
     else:
@@ -323,7 +347,7 @@ def setup_and_train(args, eval_func):
     manager, model = setup_model(args)
 
     print_if("loading tokenizer", args.verbose)
-    tokenizer = AutoTokenizer.from_pretrained(args.encoder_model_id)
+    tokenizer = AutoTokenizer.from_pretrained(args.encoder_model_id, device=args.device)
 
     print_if("loading rewards", args.verbose)
     reward_generator = load_rewards(args)
