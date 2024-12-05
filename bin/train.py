@@ -7,7 +7,7 @@ import torch
 from torch.nn.utils.rnn import pad_sequence
 from scrl.config import load_config
 from scrl.training import setup_and_train
-from scrl.model import labels_to_summary
+from scrl.utils import labels_to_summary
 from scrl.eval_metrics import compute_token_f1
 import scrl.utils as utils
 from nltk import word_tokenize

@@ -84,3 +84,12 @@ def read_jsonl_gz(path):
     with gzip.open(path) as f:
         for l in f:
             yield json.loads(l)
+
+def labels_to_summary(input_batch, label_batch, tokenizer):
+    summaries = []
+    for input_ids, labels in zip(input_batch, label_batch):
+        selected = [int(input_ids[i]) for i in range(len(input_ids))
+                           if labels[i] == 1]
+        summary = tokenizer.decode(selected, skip_special_tokens=True)
+        summaries.append(summary)
+    return summaries

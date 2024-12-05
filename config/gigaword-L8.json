@@ -3,6 +3,7 @@
     "dataset": "data/train-data/gigaword",
     "indices": "data/train-data/gigaword/indices.npy",
     "model_dir": "data/models/gigaword-L8",
+    "model_name": "LinearTokenSelector",
     "verbose": true,
     "use_wandb": true,
     "wandb": {
@@ -18,8 +19,6 @@
     "max_train_steps": 8000,
     "batch_size": 4,
     "learning_rate": 1e-05,
-    "k_samples": 100,
-    "sample_aggregation": "max",
     "loss": "pgb",
     "encoder_model_id": "./distilroberta-base/",
     "rewards": {
@@ -39,5 +38,9 @@
             "mean": 8,
             "std": 3.2
         }
+    }, 
+    "model_kwargs": {
+        "k_samples": 100,
+        "sample_aggregation": "max"
     }
 }

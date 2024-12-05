@@ -4,7 +4,7 @@ import numpy as np
 from collections import defaultdict
 from torch.distributions import Categorical
 from torch.nn.utils.rnn import pad_sequence
-from scrl.model import labels_to_summary
+from scrl.utils import labels_to_summary
 from nltk import word_tokenize
 from pprint import pprint
 
@@ -16,6 +16,20 @@ def sample_from_policy(
         force_diff=True,
         diff_trials=1000,
     ):
+    """
+    Sample labels from the distribution of the policy.
+
+    args:
+    - input_ids: torch.Tensor, shape (batch_size, seq_len)
+    - probs: torch.Tensor, shape (batch_size, seq_len, vocab_size)
+    - device: str, device
+    - force_diff: bool, whether to force the sampled labels to be different from the argmax labels
+    - diff_trials: int, number of trials to force the sampled labels to be different from the argmax labels
+
+    return:
+    - sample_probs: torch.Tensor, shape (batch_size, seq_len)
+    - sample_labels: torch.Tensor, shape (batch_size, seq_len)
+    """
     m = Categorical(probs)
     argmax_labels = torch.argmax(probs, dim=2)
     sample_labels = m.sample()
@@ -42,6 +56,20 @@ def best_of_k_samples(
         k_samples=50,
         return_all=False
     ):
+    """
+    Sample k samples from the policy and return the best one.
+
+    args:
+    - args: arguments containing device
+    - manager: ?
+    - tokenizer: tokenizer
+    - reward_generator: reward generator
+    - input_ids: torch.Tensor, shape (batch_size, seq_len)
+    - batch: dict, batch data
+    - probs: torch.Tensor, shape (batch_size, seq_len, vocab_size)
+    - k_samples: int, number of samples to draw
+    - return_all: bool, whether to return all samples
+    """
     batch_size = probs.size(0)
 
     prob_batches = []
