@@ -4,6 +4,7 @@ import json
 import gzip
 import random
 import torch
+from torch.nn.utils.rnn import pad_sequence
 
 
 class TransformersTokenizerWrapper:
@@ -93,3 +94,20 @@ def labels_to_summary(input_batch, label_batch, tokenizer):
         summary = tokenizer.decode(selected, skip_special_tokens=True)
         summaries.append(summary)
     return summaries
+
+def labels_to_ids(input_batch, label_batch):
+    idsl = []
+    for input_ids, labels in zip(input_batch, label_batch):
+        selected = [int(input_ids[i]) for i in range(len(input_ids))
+                           if labels[i] == 1]
+        idsl.append(selected)
+    return pad_sequence(
+        [torch.tensor(ids) for ids in idsl],
+        batch_first=True
+    ).to(input_batch[0].device)
+
+def soft_update_dict(target, source, tau):
+    for k, v in source.items():
+        target[k] = tau * v + (1 - tau) * target[k]
+    return target
+    
