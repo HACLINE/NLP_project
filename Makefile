@@ -1,6 +1,7 @@
-CONFIG ?= config/example.json
+CONFIG ?= config/gigaword-ActorCritic.json
 DEVICE ?= cuda
-MODELDIR ?= data/models/example
+MODELDIR ?= data/models/HybridCritic
+# MODELDIR ?= data/models/example
 TESTSET ?= data/test-data/broadcast.jsonl
 HC_OUTPUT ?= data/hc-outputs/hc.L11.google.jsonl
 
@@ -8,10 +9,22 @@ HC_OUTPUT ?= data/hc-outputs/hc.L11.google.jsonl
 
 .PHONY: train
 train:
-	python bin/train.py --verbose --config $(CONFIG) --device $(DEVICE)
-
+	python bin/train.py --config $(CONFIG) --device $(DEVICE) 
+train-my:
+	python bin/train.py --config config/gigaword-LinearQ.json --device $(DEVICE) 
 # EVALUATING SCRL MODELS (predict + evaluate)
-
+train-hybrid:
+	python bin/train.py --config config/gigaword-HybridQ.json --device $(DEVICE)
+train-hybrid-critic:
+	python bin/train.py --config config/gigaword-HybridCritic.json --device $(DEVICE)
+train-actor-critic:
+	python bin/train.py --config config/gigaword-ActorCritic.json --device $(DEVICE)
+train-transformer-Q:
+	python bin/train.py --config config/gigaword-TransformerQ.json --device $(DEVICE)
+try:
+	python bin/train.py --config config/gigaword-HybridCritictry.json --device $(DEVICE) 
+all:
+	python bin/train.py --config config/gigaword-all.json --device $(DEVICE) 
 .PHONY: eval-google
 eval-google:
 	python bin/evaluate.py \

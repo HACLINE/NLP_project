@@ -5,7 +5,8 @@ import gzip
 import random
 import torch
 from torch.nn.utils.rnn import pad_sequence
-
+from torch.autograd import Variable
+import torch.nn as nn
 
 class TransformersTokenizerWrapper:
     def __init__(self, tokenizer):
@@ -111,3 +112,40 @@ def soft_update_dict(target, source, tau):
         target[k] = tau * v + (1 - tau) * target[k]
     return target
     
+def shuffle(x):
+    return random.sample(x, len(x))
+
+def shuffle_2_grams(x):
+    ''' This function can shuffle the order of 2-grams in a list of tokens. '''
+    start = 1 if random.random() < 0.5 else 0
+    add = [[x[0]]] if start else [[]]
+    x_nest = add + [x[i:i+2] for i in range(start, len(x), 2)]
+    random.shuffle(x_nest)
+    return [item for sublist in x_nest for item in sublist]
+def mask(lengths):
+    batch_size = len(lengths)
+    max_length = max(lengths)
+    if max_length == min(lengths):
+        return None
+    mask = torch.ByteTensor(batch_size, max_length).fill_(0)
+    for i in range(batch_size):
+        for j in range(lengths[i], max_length):
+            mask[i, j] = 1
+    return mask
+
+
+def masked_nllloss(logprobs, target, lengths, device):
+    criterion = nn.NLLLoss(reduce=False)
+    loss_raw = criterion(
+        logprobs.view(-1, logprobs.shape[-1]),
+        target.view(-1),
+    )
+    loss_mask = torch.ones(target.shape)
+    for i, length in enumerate(lengths):
+        if length < loss_mask.shape[0]:
+            loss_mask[length:, i] = 0
+    return (
+        (loss_raw * device(
+          Variable(loss_mask.view(-1)))).sum()
+        / loss_mask.sum()
+    )

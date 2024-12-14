@@ -4,8 +4,8 @@
     "indices": "data/train-data/gigaword/indices.npy",
     "model_dir": "data/models/example",
     "model_name": "LinearTokenSelector",
-    "verbose": true,
-    "use_wandb": false,
+    "verbose": false,
+    "use_wandb": true,
     "wandb": {
         "project": "scrl",
         "name": "example"

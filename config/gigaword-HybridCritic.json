@@ -1,22 +1,22 @@
 {
-    "loader": "loaders/newsroom.py",
-    "dataset": "data/train-data/newsroom",
-    "indices": "data/train-data/newsroom/indices.npy",
-    "model_dir": "data/models/newsroom-Transformer-CR75",
-    "model_name": "TransformerTokenSelector",
+    "loader": "loaders/gigaword.py",
+    "dataset": "data/train-data/gigaword",
+    "indices": "data/train-data/gigaword/indices.npy",
+    "model_dir": "data/models/HybridCritic",
+    "model_name": "HybridCritic",
     "verbose": false,
     "use_wandb": true,
     "wandb": {
         "project": "scrl",
-        "name": "newsroom-Transformer-CR75"
+        "name": "HybridCritic"
     },
     "use_tb": true,
     "print_every": 1,
-    "eval_every": 50,
-    "save_every": 50,
+    "eval_every": 10,
+    "save_every": 10,
     "max_val_steps": 512,
     "max_train_seconds": null,
-    "max_train_steps": 8000,
+    "max_train_steps": 10000,
     "batch_size": 4,
     "learning_rate": 1e-05,
     "loss": "pgb",
@@ -42,6 +42,12 @@
     "model_kwargs": {
         "k_samples": 100,
         "sample_aggregation": "max",
-        "num_heads": 2
+        "num_heads": 2,
+        "tau": 0.1,
+        "gamma": 0.5,
+        "explore_num": 50,
+        "explore_rounds": 1,
+        "entropy_weight": 0.01,
+        "exploit_num": 2
     }
 }

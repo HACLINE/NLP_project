@@ -26,9 +26,9 @@ from torch.utils.tensorboard import SummaryWriter
 from scrl.manager import TrainingManager
 import scrl.utils as utils
 import scrl.sampling as sampling
-
+from torch.autograd import Variable
 from nltk import word_tokenize
-
+import scrl.DATA as DATA
 def setup_model(args):
     # setup/load model manager object
     model_dir = Path(args.model_dir)
@@ -159,6 +159,7 @@ class BaseModel(nn.Module):
         ).to(self.device)
         logits = self.forward(input_ids)
         argmax_labels = torch.argmax(logits, dim=2)
+        # print(argmax_labels)
         return utils.labels_to_summary(input_ids, argmax_labels, tokenizer)
     
     def update(self,
@@ -529,6 +530,409 @@ class ActorCritic(BaseModel):
             entropy = entropy / len(target_critics_batch)
             loss += actor_loss - self.args.entropy_weight * entropy
 
+            loss.backward()
+            optimizer.step()
+
+            self.soft_update()
+
+            metrics = {
+                "critic_loss": critic_loss.item(),
+                "actor_loss": actor_loss.item(),
+                "entropy": entropy.mean().item()
+            }
+            manager.update_metrics(metrics)
+
+
+            self.manager_update(manager,
+                                loss,
+                                a_reward,
+                                s_reward,
+                                sample_probs,
+                                probs,
+                                argmax_len,
+                                argmax_details
+                                )
+            
+            batch["document"] = argmax_summaries
+            batch["input_ids"] = tokenizer(argmax_summaries)["input_ids"]
+            # print(f"Round: {_}, Batch: {batch}")
+
+        return probs, argmax_summaries, sample_summaries, argmax_details    
+
+    def predict(self, texts, tokenizer):
+        for i in range(self.args.exploit_num):
+            input_ids = tokenizer(texts)["input_ids"]
+            input_ids = pad_sequence(
+                [torch.tensor(ids) for ids in input_ids], batch_first=True
+            ).to(self.device)
+            logits = self.forward(input_ids)
+            argmax_labels = torch.argmax(logits, dim=2)
+            texts = utils.labels_to_summary(input_ids, argmax_labels, tokenizer)
+        return texts
+
+class LinearQ(BaseModel):
+    def __init__(self, encoder, embedding_size, device, kwargs):
+        super(LinearQ, self).__init__(encoder, embedding_size, device, kwargs)
+        self.q_network = nn.Linear(embedding_size, 2)
+        self.target_q_network = copy.deepcopy(self.q_network)
+        self.networks.extend(["q_network", "target_q_network"])
+
+    def forward(self, x):
+        output = self.encoder(x, output_hidden_states=True)
+        x = output["hidden_states"][-1]  # B * S * H
+        q_values = self.q_network(x)
+        return q_values
+    def forward_target(self, x):
+        output = self.encoder(x, output_hidden_states=True)
+        x = output["hidden_states"][-1]
+        q_values = self.target_q_network(x)
+        return q_values
+    def soft_update(self):
+        self.target_q_network.load_state_dict(utils.soft_update_dict(self.target_q_network.state_dict(), self.q_network.state_dict(), self.args.tau))
+
+    def update(self,
+               batch,
+               optimizer,
+               tokenizer,
+               reward_generator,
+               manager,
+               ):
+        optimizer.zero_grad()
+
+        input_ids = pad_sequence(
+            [torch.tensor(ids) for ids in batch["input_ids"]],
+            batch_first=True
+        ).to(self.device)
+
+        q_values = self.forward(input_ids)
+        probs = torch.softmax(q_values, dim=2)
+
+        argmax_labels = torch.argmax(q_values, dim=2).to(self.device)
+        argmax_summaries = utils.labels_to_summary(input_ids, argmax_labels, tokenizer)
+        argmax_rewards, argmax_details = reward_generator(batch["document"], argmax_summaries)
+        a_reward = np.mean(argmax_rewards)
+
+        (sample_probs, sample_summaries, sample_rewards, sample_details,
+        sample_labels, sample_data) = sampling.best_of_k_samples(
+            self.args, manager, tokenizer, reward_generator,
+            input_ids, batch, probs,
+            k_samples=self.args.k_samples,
+        )
+        s_reward = np.mean(sample_rewards)
+
+        argmax_len = np.mean([len(word_tokenize(s)) for s in argmax_summaries])
+
+        # Update Q network
+        with torch.no_grad():
+            target_q_values = self.forward_target(float(input_ids))
+            rewards = torch.tensor(sample_rewards, dtype=torch.float).to(self.device)
+            rewards = torch.mean(rewards, dim=0)
+            target_q_values = rewards + self.args.gamma * target_q_values
+
+        q_loss = F.mse_loss(q_values, target_q_values)
+        loss = q_loss
+
+        loss.backward()
+        optimizer.step()
+
+        self.soft_update()
+
+        self.manager_update(manager,
+                            loss,
+                            a_reward,
+                            s_reward,
+                            sample_probs,
+                            probs,
+                            argmax_len,
+                            argmax_details
+                            )
+
+        return probs, argmax_summaries, sample_summaries, argmax_details
+    
+class TransformerQ(BaseModel):
+    def __init__(self, encoder, embedding_size, device, kwargs):
+        super(TransformerQ, self).__init__(encoder, embedding_size, device, kwargs)
+        self.q_network = nn.Sequential(
+            nn.TransformerEncoderLayer(embedding_size, 2),
+            nn.TransformerEncoderLayer(embedding_size, 2),
+            nn.Linear(embedding_size, 128),
+            nn.ReLU(),
+            nn.Linear(128, 2)
+        )
+        self.target_q_network = copy.deepcopy(self.q_network)
+        self.networks.extend(["q_network", "target_q_network"])
+
+    def forward(self, x):
+        output = self.encoder(x, output_hidden_states=True)
+        x = output["hidden_states"][-1]  # B * S * H
+        q_values = self.q_network(x)
+        return q_values
+    def forward_target(self, x):
+        output = self.encoder(x, output_hidden_states=True)
+        x = output["hidden_states"][-1]
+        q_values = self.target_q_network(x)
+        return q_values
+    def soft_update(self):
+        self.target_q_network.load_state_dict(utils.soft_update_dict(self.target_q_network.state_dict(), self.q_network.state_dict(), self.args.tau))
+
+    def update(self,
+               batch,
+               optimizer,
+               tokenizer,
+               reward_generator,
+               manager,
+               ):
+        optimizer.zero_grad()
+
+        input_ids = pad_sequence(
+            [torch.tensor(ids) for ids in batch["input_ids"]],
+            batch_first=True
+        ).to(self.device)
+
+        q_values = self.forward(input_ids)
+        probs = torch.softmax(q_values, dim=2)
+
+        argmax_labels = torch.argmax(q_values, dim=2).to(self.device)
+        argmax_summaries = utils.labels_to_summary(input_ids, argmax_labels, tokenizer)
+        argmax_rewards, argmax_details = reward_generator(batch["document"], argmax_summaries)
+        a_reward = np.mean(argmax_rewards)
+
+        (sample_probs, sample_summaries, sample_rewards, sample_details,
+        sample_labels, sample_data) = sampling.best_of_k_samples(
+            self.args, manager, tokenizer, reward_generator,
+            input_ids, batch, probs,
+            k_samples=self.args.k_samples,
+        )
+        s_reward = np.mean(sample_rewards)
+
+        argmax_len = np.mean([len(word_tokenize(s)) for s in argmax_summaries])
+
+        # Update Q network
+        with torch.no_grad():
+            target_q_values = self.forward_target(input_ids)
+            rewards = torch.tensor(sample_rewards, dtype=torch.float).to(self.device)
+            rewards = torch.mean(rewards, dim=0)
+            target_q_values = rewards + self.args.gamma * target_q_values
+
+        q_loss = F.mse_loss(q_values, target_q_values)
+        loss = q_loss
+
+        loss.backward()
+        optimizer.step()
+
+        self.soft_update()
+
+        self.manager_update(manager,
+                            loss,
+                            a_reward,
+                            s_reward,
+                            sample_probs,
+                            probs,
+                            argmax_len,
+                            argmax_details
+                            )
+
+        return probs, argmax_summaries, sample_summaries, argmax_details
+class HybridQ(BaseModel):
+    def __init__(self, encoder, embedding_size, device, kwargs):
+        super(HybridQ, self).__init__(encoder, embedding_size, device, kwargs)
+        self.q_network = nn.Linear(embedding_size, 2)
+        self.target_q_network = copy.deepcopy(self.q_network)
+        self.networks.extend(["q_network", "target_q_network"])
+
+    def forward(self, x):
+        output = self.encoder(x, output_hidden_states=True)
+        x = output["hidden_states"][-1]  # B * S * H
+        q_values = self.q_network(x)
+        return q_values
+    def forward_target(self, x):
+        output = self.encoder(x, output_hidden_states=True)
+        x = output["hidden_states"][-1]
+        q_values = self.target_q_network(x)
+        return q_values
+
+    def soft_update(self):
+        self.target_q_network.load_state_dict(utils.soft_update_dict(self.target_q_network.state_dict(), self.q_network.state_dict(), self.args.tau))
+
+    def update(self,
+               batch,
+               optimizer,
+               tokenizer,
+               reward_generator,
+               manager,
+               ):
+        optimizer.zero_grad()
+
+        input_ids = pad_sequence(
+            [torch.tensor(ids) for ids in batch["input_ids"]],
+            batch_first=True
+        ).to(self.device)
+
+        q_values = self.forward(input_ids)
+        probs = torch.softmax(q_values, dim=2)
+
+        argmax_labels = torch.argmax(q_values, dim=2).to(self.device)
+        argmax_summaries = utils.labels_to_summary(input_ids, argmax_labels, tokenizer)
+        argmax_rewards, argmax_details = reward_generator(batch["document"], argmax_summaries)
+        a_reward = np.mean(argmax_rewards)
+
+        (sample_probs, sample_summaries, sample_rewards, sample_details,
+        sample_labels, sample_data) = sampling.best_of_k_samples(
+            self.args, manager, tokenizer, reward_generator,
+            input_ids, batch, probs,
+            k_samples=self.args.k_samples,
+        )
+        s_reward = np.mean(sample_rewards)
+
+        argmax_len = np.mean([len(word_tokenize(s)) for s in argmax_summaries])
+
+        # Update Q network
+        with torch.no_grad():
+            target_q_values = self.forward_target(input_ids)
+            rewards = torch.tensor(sample_rewards, dtype=torch.float).to(self.device)
+            rewards = torch.mean(rewards, dim=0)
+            target_q_values = rewards + self.args.gamma * target_q_values
+
+        q_loss = F.mse_loss(q_values, target_q_values)
+
+        if self.args.sample_aggregation == "max":
+            loss1 = (a_reward - s_reward) * sample_probs.sum(1).mean()
+        else:
+            loss1 = 0.
+            for sample_probs_i, s_rewards_i, a_rewards_i in zip(sample_data["probs"], sample_data["rewards"], sample_rewards):
+                s_reward_i = np.mean(s_rewards_i)
+                a_reward_i = np.mean(a_rewards_i)
+                loss_i = (a_reward_i - s_reward_i) * sample_probs_i.sum(1).mean()
+                loss1 += loss_i
+            loss1 /= len(sample_data["rewards"])
+        loss = q_loss + loss1
+        loss.backward()
+        optimizer.step()
+
+        self.soft_update()
+
+        self.manager_update(manager,
+                            loss,
+                            a_reward,
+                            s_reward,
+                            sample_probs,
+                            probs,
+                            argmax_len,
+                            argmax_details
+                            )
+
+        return probs, argmax_summaries, sample_summaries, argmax_details
+    
+class HybridCritic(BaseModel):
+    def __init__(self, encoder, embedding_size, device, kwargs):
+        super(HybridCritic, self).__init__(encoder, embedding_size, device, kwargs)
+        self.actor = nn.Sequential(
+            nn.TransformerEncoderLayer(embedding_size, 2),
+            nn.Linear(embedding_size, 2)
+        )
+        self.critic_encoder = copy.deepcopy(encoder)
+        self.critic = nn.Sequential(
+            nn.TransformerEncoderLayer(embedding_size, 2),
+            nn.Linear(embedding_size, 1),
+            Squeeze(-1),
+            nn.AdaptiveAvgPool1d(1),
+            Squeeze(-1)
+        )
+
+        self.target_critic_encoder = copy.deepcopy(self.critic_encoder)
+        self.target_critic = copy.deepcopy(self.critic)
+
+        self.networks.extend(["actor", "critic", "target_critic", "critic_encoder", "target_critic_encoder"])
+        self.is_encoder.extend(["critic_encoder", "target_critic_encoder"])
+
+    def forward(self, x):
+        output = self.encoder(x, output_hidden_states=True)
+        x = output["hidden_states"][-1]
+        actor_logits = self.actor(x)
+        return F.log_softmax(actor_logits, dim=2)
+    
+    def soft_update(self):
+        self.target_critic_encoder.load_state_dict(utils.soft_update_dict(self.target_critic_encoder.state_dict(), self.critic_encoder.state_dict(), self.args.tau))
+        self.target_critic.load_state_dict(utils.soft_update_dict(self.target_critic.state_dict(), self.critic.state_dict(), self.args.tau))
+
+    def update(self,
+               batch,
+               optimizer,
+               tokenizer,
+               reward_generator,
+               manager,
+               ):
+        for _ in range(self.args.explore_rounds):
+            optimizer.zero_grad()
+
+            input_ids = pad_sequence(
+                [torch.tensor(ids) for ids in batch["input_ids"]],
+                batch_first=True
+            ).to(self.device)
+
+            logits = self.forward(input_ids)
+            probs = torch.softmax(logits, dim=2)
+
+            argmax_labels = torch.argmax(logits, dim=2).to(self.device)
+            argmax_summaries = utils.labels_to_summary(input_ids, argmax_labels, tokenizer)
+            argmax_rewards, argmax_details = reward_generator(batch["document"], argmax_summaries)
+            a_reward = np.mean(argmax_rewards)
+
+            (sample_probs, sample_summaries, sample_rewards, sample_details,
+            sample_labels, sample_data) = sampling.best_of_k_samples(
+                self.args, manager, tokenizer, reward_generator,
+                input_ids, batch, probs,
+                k_samples=self.args.k_samples,
+            )
+            s_reward = np.mean(sample_rewards)
+
+            argmax_len = np.mean([len(word_tokenize(s)) for s in argmax_summaries])
+
+            # Extend batch
+            prob_batches, summary_batches, reward_batches, detail_batches, label_batches, ids_batches = sampling.k_samples(
+                self.args, manager, tokenizer, reward_generator,
+                input_ids, batch, probs,
+                k_samples=self.args.explore_num,
+                return_all=True
+            )
+            target_critics_batch = [self.target_critic(self.target_critic_encoder(ids, output_hidden_states=True)["hidden_states"][-1]).flatten().detach() for ids in ids_batches]
+
+            # Update critic
+            critic_input = self.critic_encoder(input_ids, output_hidden_states=True)["hidden_states"][-1]
+            current_critics = self.critic(critic_input)
+            target_critics = torch.stack(target_critics_batch).mean(dim=0)
+            rewards = torch.tensor(reward_batches, dtype=torch.float).to(self.device)
+            rewards = torch.mean(rewards, dim=0)
+            target_critics = target_critics * self.args.gamma + rewards
+            critic_loss = F.mse_loss(current_critics, target_critics)
+            loss = critic_loss
+
+            # Update actor
+            current_critics = current_critics.detach()
+            actor_loss = 0.
+            entropy = 0.
+            for sample_probs_i, rewards_i, target_critic_i in zip(prob_batches, reward_batches, target_critics_batch):
+                rewards_i = torch.tensor(rewards_i, dtype=torch.float).to(self.device).detach()
+                target_critic_i = target_critic_i.detach()
+                advantage = rewards_i + self.args.gamma * target_critic_i - current_critics
+                sample_probs_i = sample_probs_i.mean(dim=1)
+                actor_loss_i = - (sample_probs_i * advantage).mean()
+                entropy += - sample_probs_i.mean()
+                actor_loss += actor_loss_i
+            actor_loss = actor_loss / len(target_critics_batch)
+            entropy = entropy / len(target_critics_batch)
+            loss += actor_loss - self.args.entropy_weight * entropy
+            if self.args.sample_aggregation == "max":
+                loss1 = (a_reward - s_reward) * sample_probs.sum(1).mean()
+            else:
+                loss1 = 0.
+                for sample_probs_i, s_rewards_i, a_rewards_i in zip(sample_data["probs"], sample_data["rewards"], sample_rewards):
+                    s_reward_i = np.mean(s_rewards_i)
+                    a_reward_i = np.mean(a_rewards_i)
+                    loss_i = (a_reward_i - s_reward_i) * sample_probs_i.sum(1).mean()
+                    loss1 += loss_i
+                loss1 /= len(sample_data["rewards"])
+            loss += loss1
             loss.backward()
             optimizer.step()
 

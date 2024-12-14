@@ -4,6 +4,7 @@ from pathlib import Path
 import tqdm
 from pprint import pprint
 import torch
+import sys
 from torch.nn.utils.rnn import pad_sequence
 from scrl.config import load_config
 from scrl.training import setup_and_train

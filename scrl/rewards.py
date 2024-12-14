@@ -175,7 +175,7 @@ class SelectedTokenSimilarity:
         ):
         self.model = SentenceTransformer(model_id).to(device)
         self.weight = weight
-        self.tokenizer = model.tokenizer
+        self.tokenizer = self.model.tokenizer
 
     def ids_to_tokens(self, ids):
         return [self.tokenizer._convert_id_to_token(id) for id in ids]
@@ -223,13 +223,17 @@ class SelectedTokenSimilarity:
 
 
 class NLIReward():
+    '''
+    Uses a cross-encoder to predict entailment between source and summary.
+    A higher reward means the summary is more likely to be entailed by the source.
+    '''
     def __init__(
             self,
             model_id="cross-encoder/nli-distilroberta-base",
             device="cuda",
             weight=1
         ):
-        self.model = CrossEncoder(model_id, device)
+        self.model = CrossEncoder(model_id)
         self.label_mapping = ['contradiction', 'entailment', 'neutral']
         self.weight = weight
 
@@ -268,6 +272,9 @@ class GaussianLength:
 
 
 class GaussianCR:
+    '''
+    Gaussian reward for compression ratio.
+    '''
     def __init__(self, mean=0.45, std=0.3, weight=1, device=None):
         self.weight = weight
         ratios = np.arange(0, 1.1, 0.01)
@@ -326,5 +333,18 @@ class RougeReward:
             score = rouge_scores[self.rouge_type].fmeasure
             scores.append(score)
         return scores
-
-#
+class SentenceSimilarityReward:
+    def __init__(self, model_id="sentence-transformers/all-MiniLM-L12-v2", weight=1, device=None):
+        self.model = SentenceTransformer(model_id).to(device)
+        self.weight = weight
+    def __call__(self, sources=None, summaries=None):
+        src_embs = self.model.encode(sources)
+        sum_embs = self.model.encode(summaries)
+        scores = []
+        for i in range(len(summaries)):
+            score = pytorch_cos_sim(
+                src_embs[i].reshape(1, -1),
+                sum_embs[i].reshape(1, -1),
+            )[0, 0].item()
+            scores.append(score)
+        return scores

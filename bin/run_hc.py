@@ -1,10 +1,13 @@
 import argparse
+import sys
+sys.path.append('/home/ubuntu/NLP/NLP_project')
 from scrl.hill_climbing import DynamicRestartHCSC, PunktTokenizer, WhiteSpaceTokenizer
 from scrl.config_hc import load_config
 from scrl.rewards import load_rewards
 from scrl import utils
 import tqdm
 from pathlib import Path
+
 
 
 def run_on_dataset(
