@@ -28,7 +28,6 @@ import scrl.utils as utils
 import scrl.sampling as sampling
 from torch.autograd import Variable
 from nltk import word_tokenize
-import scrl.DATA as DATA
 def setup_model(args):
     # setup/load model manager object
     model_dir = Path(args.model_dir)

@@ -1,0 +1,28 @@
+python bin/evaluate.py \
+	--model-dir data/models/allActorCriticnew \
+	--device cuda \
+	--dataset data/test-data/google.jsonl
+====================================================================================================
+RESULTS:
+==================== Length (#tokens): ====================
+src-len: 26.95
+tgt-len: 11.01
+pred-len: 22.15
+
+==================== Compression ratio: ====================
+tgt-cr: 0.45
+pred-cr: 0.83
+
+==================== Token F1-Score: ====================
+f1-score: 0.617
+
+==================== ROUGE F1-Scores: ====================
+rouge1: 0.6062
+rouge2: 0.4760
+rougeL: 0.6027
+
+==================== ROUGE Recall: ====================
+rouge1: 0.9311
+rouge2: 0.7623
+rougeL: 0.9254
+

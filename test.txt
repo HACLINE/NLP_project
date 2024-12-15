@@ -1,0 +1,2 @@
+Reward to be add:
+1. for one batch, generate sentences for each of them, clustering and find out that the compression came from the same initial sentence is in the same cluster

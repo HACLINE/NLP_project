@@ -1,7 +1,11 @@
 CONFIG ?= config/gigaword-ActorCritic.json
 DEVICE ?= cuda
-MODELDIR ?= data/models/HybridCritic
+# MODELDIR ?= data/models/all
 # MODELDIR ?= data/models/example
+MODELDIR ?= data/models/allActorCritic
+# MODELDIR ?= data/models/allActorCriticnew
+# MODELDIR ?= data/models/half-compress
+# MODELDIR ?= data/models/HybridCritictry
 TESTSET ?= data/test-data/broadcast.jsonl
 HC_OUTPUT ?= data/hc-outputs/hc.L11.google.jsonl
 
@@ -10,6 +14,8 @@ HC_OUTPUT ?= data/hc-outputs/hc.L11.google.jsonl
 .PHONY: train
 train:
 	python bin/train.py --config $(CONFIG) --device $(DEVICE) 
+half-compress:
+	python bin/train.py --config config/half-compress.json --device $(DEVICE)
 train-my:
 	python bin/train.py --config config/gigaword-LinearQ.json --device $(DEVICE) 
 # EVALUATING SCRL MODELS (predict + evaluate)
@@ -25,6 +31,10 @@ try:
 	python bin/train.py --config config/gigaword-HybridCritictry.json --device $(DEVICE) 
 all:
 	python bin/train.py --config config/gigaword-all.json --device $(DEVICE) 
+old:
+	python bin/train.py --config config/gigaword-actorcriticallold.json --device $(DEVICE)
+train-actor-critic-all:
+	python bin/train.py --config config/gigaword-actorcriticall.json --device $(DEVICE)
 .PHONY: eval-google
 eval-google:
 	python bin/evaluate.py \
