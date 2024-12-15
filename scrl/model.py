@@ -536,6 +536,7 @@ class ActorCritic(BaseModel):
 
             metrics = {
                 "critic_loss": critic_loss.item(),
+                "critics": current_critics.mean().item(),
                 "actor_loss": actor_loss.item(),
                 "entropy": entropy.mean().item()
             }

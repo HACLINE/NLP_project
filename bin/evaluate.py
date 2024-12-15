@@ -36,7 +36,10 @@ def main(args):
         if args.lower_src:
             src = src.lower()
         tgts = item["summaries"]
-        pred = model.predict([src], tokenizer)[0]
+
+        pred = src
+        for _ in range(args.pred_round):
+            pred = model.predict([pred], tokenizer)[0]
 
         if args.max_chars > 0:
             pred = pred[:args.max_chars]
@@ -130,6 +133,7 @@ def parse_args():
     parser.add_argument('--verbose', action="store_true")
     parser.add_argument('--lower-src', action="store_true")
     parser.add_argument('--lower-summary', action="store_true")
+    parser.add_argument('--pred-round', type=int, default=1)
     return parser.parse_args()
 
 

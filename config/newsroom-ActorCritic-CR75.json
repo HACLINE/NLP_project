@@ -2,13 +2,13 @@
     "loader": "loaders/newsroom.py",
     "dataset": "data/train-data/newsroom",
     "indices": "data/train-data/newsroom/indices.npy",
-    "model_dir": "data/models/newsroom-ActorCritic-CR75-2",
+    "model_dir": "data/models/newsroom-ActorCritic-CR75-3",
     "model_name": "ActorCritic",
     "verbose": true,
-    "use_wandb": false,
+    "use_wandb": true,
     "wandb": {
         "project": "scrl",
-        "name": "newsroom-ActorCritic-CR75"
+        "name": "newsroom-ActorCritic-CR75-explore4"
     },
     "use_tb": true,
     "print_every": 1,
@@ -16,7 +16,7 @@
     "save_every": 50,
     "max_val_steps": 512,
     "max_train_seconds": null,
-    "max_train_steps": 8000,
+    "max_train_steps": 2000,
     "batch_size": 4,
     "learning_rate": 1e-05,
     "loss": "pgb",
@@ -46,8 +46,8 @@
         "tau": 0.1,
         "gamma": 0.5,
         "explore_num": 50,
-        "explore_rounds": 1,
+        "explore_rounds": 4,
         "entropy_weight": 0.01,
-        "exploit_num": 2
+        "exploit_num": 1
     }
 }
