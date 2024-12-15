@@ -1,8 +1,8 @@
 CONFIG ?= config/gigaword-ActorCritic.json
 DEVICE ?= cuda
 # MODELDIR ?= data/models/all
-# MODELDIR ?= data/models/example
-MODELDIR ?= data/models/allActorCritic
+MODELDIR ?= data/models/example
+# MODELDIR ?= data/models/allActorCritic
 # MODELDIR ?= data/models/allActorCriticnew
 # MODELDIR ?= data/models/half-compress
 # MODELDIR ?= data/models/HybridCritictry
@@ -13,7 +13,7 @@ HC_OUTPUT ?= data/hc-outputs/hc.L11.google.jsonl
 
 .PHONY: train
 train:
-	python bin/train.py --config $(CONFIG) --device $(DEVICE) 
+	python bin/train.py --config config/example.json --device $(DEVICE) 
 half-compress:
 	python bin/train.py --config config/half-compress.json --device $(DEVICE)
 train-my:
@@ -33,15 +33,41 @@ all:
 	python bin/train.py --config config/gigaword-all.json --device $(DEVICE) 
 old:
 	python bin/train.py --config config/gigaword-actorcriticallold.json --device $(DEVICE)
+half-compress2:
+	python bin/train.py --config config/half-compress2.json --device $(DEVICE)
 train-actor-critic-all:
 	python bin/train.py --config config/gigaword-actorcriticall.json --device $(DEVICE)
 .PHONY: eval-google
 eval-google:
 	python bin/evaluate.py \
 		--model-dir $(MODELDIR) \
-		--device $(DEVICE) \
+		--device cpu \
 		--dataset data/test-data/google.jsonl
-
+eval-all-google:
+	python bin/evaluate.py \
+		--model-dir data/models/allActorCritic \
+		--device $(DEVICE) \
+		--dataset data/test-data/google.jsonl > allactorcritic.txt
+	python bin/evaluate.py \
+		--model-dir data/models/allActorCriticnew \
+		--device $(DEVICE) \
+		--dataset data/test-data/google.jsonl > allactorcriticnew.txt
+	python bin/evaluate.py \
+		--model-dir data/models/half-compress \
+		--device $(DEVICE)\
+		--dataset data/test-data/google.jsonl > half-compress.txt
+	python bin/evaluate.py \
+		--model-dir data/models/half-compress2 \
+		--device $(DEVICE) \
+		--dataset data/test-data/google.jsonl > half-compress2.txt
+	python bin/evaluate.py \
+		--model-dir data/models/all \
+		--device $(DEVICE) \
+		--dataset data/test-data/google.jsonl > all.txt
+	python bin/evaluate.py \
+		--model-dir data/models/example \
+		--device $(DEVICE) \
+		--dataset data/test-data/google.jsonl > example.txt
 
 .PHONY: eval-duc2004
 eval-duc2004:
@@ -86,6 +112,27 @@ hc-eval-google:
 	python bin/evaluate_hc_output.py \
 	    --dataset data/test-data/google.jsonl \
     	--outputs $(HC_OUTPUT)
+hc-eval-all-google:
+	python bin/evaluate_hc_output.py \
+		--model-dir data/models/allActorCritic \
+		--device cpu \
+		--dataset data/test-data/google.jsonl >> allactorcritic.txt
+	python bin/evaluate_hc_output.py \
+		--model-dir data/models/allActorCriticnew \
+		--device cpu \
+		--dataset data/test-data/google.jsonl >> allactorcriticnew.txt
+	python bin/evaluate_hc_output.py \
+		--model-dir data/models/half-compress \
+		--device cpu \
+		--dataset data/test-data/google.jsonl >> half-compress.txt
+	python bin/evaluate_hc_output.py \
+		--model-dir data/models/all \
+		--device cpu \
+		--dataset data/test-data/google.jsonl >> all.txt
+	python bin/evaluate_hc_output.py \
+		--model-dir data/models/example \
+		--device cpu \
+		--dataset data/test-data/google.jsonl >> example.txt
 
 
 .PHONY: hc-eval-duc2004

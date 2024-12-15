@@ -1,28 +1,24 @@
-python bin/evaluate.py \
-	--model-dir data/models/half-compress \
-	--device cuda \
-	--dataset data/test-data/google.jsonl
 ====================================================================================================
 RESULTS:
 ==================== Length (#tokens): ====================
 src-len: 26.95
 tgt-len: 11.01
-pred-len: 13.04
+pred-len: 12.32
 
 ==================== Compression ratio: ====================
 tgt-cr: 0.45
-pred-cr: 0.50
+pred-cr: 0.48
 
 ==================== Token F1-Score: ====================
-f1-score: 0.606
+f1-score: 0.617
 
 ==================== ROUGE F1-Scores: ====================
-rouge1: 0.5845
-rouge2: 0.3549
-rougeL: 0.5823
+rouge1: 0.5952
+rouge2: 0.3599
+rougeL: 0.5929
 
 ==================== ROUGE Recall: ====================
-rouge1: 0.6695
-rouge2: 0.4199
-rougeL: 0.6666
+rouge1: 0.6616
+rouge2: 0.4142
+rougeL: 0.6588
 
