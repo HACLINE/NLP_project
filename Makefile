@@ -8,6 +8,7 @@ MODELDIR ?= data/models/allActorCritic
 # MODELDIR ?= data/models/HybridCritictry
 TESTSET ?= data/test-data/broadcast.jsonl
 HC_OUTPUT ?= data/hc-outputs/hc.L11.google.jsonl
+PRED_ROUND ?= 1
 
 # TRAINING
 
@@ -40,7 +41,8 @@ eval-google:
 	python bin/evaluate.py \
 		--model-dir $(MODELDIR) \
 		--device $(DEVICE) \
-		--dataset data/test-data/google.jsonl
+		--dataset data/test-data/google.jsonl \
+		--pred-round $(PRED_ROUND)
 
 
 .PHONY: eval-duc2004
@@ -49,7 +51,8 @@ eval-duc2004:
 		--model-dir $(MODELDIR) \
 		--device $(DEVICE) \
 		--dataset data/test-data/duc2004.jsonl \
-		--max-chars 75
+		--max-chars 75 \
+		--pred-round $(PRED_ROUND)
 
 
 .PHONY: eval-gigaword
@@ -58,7 +61,8 @@ eval-gigaword:
 		--model-dir $(MODELDIR) \
 		--device $(DEVICE) \
 		--dataset data/test-data/gigaword.jsonl \
-		--pretokenized
+		--pretokenized \
+		--pred-round $(PRED_ROUND)
 
 
 .PHONY: eval-broadcast
@@ -67,7 +71,8 @@ eval-broadcast:
 		--model-dir $(MODELDIR) \
 		--device $(DEVICE) \
 		--dataset data/test-data/broadcast.jsonl \
-		--pretokenized
+		--pretokenized \
+		--pred-round $(PRED_ROUND)
 
 
 .PHONY: eval-bnc
@@ -76,7 +81,8 @@ eval-bnc:
 		--model-dir $(MODELDIR) \
 		--device $(DEVICE) \
 		--dataset data/test-data/bnc.jsonl \
-		--pretokenized
+		--pretokenized \
+		--pred-round $(PRED_ROUND)
 
 
 # EVALUATE HILL CLIMBING SEARCH
