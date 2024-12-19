@@ -2,148 +2,148 @@ python bin/evaluate.py \
 	--model-dir data/models/all \
 	--device cpu \
 	--dataset data/test-data/google.jsonl \
-	--pred-round 1 
+	--pred-round 5 
 ====================================================================================================
 RESULTS:
 ==================== Length (#tokens): ====================
 src-len: 26.95
 tgt-len: 11.01
-pred-len: 17.28
+pred-len: 15.12
 
 ==================== Compression ratio: ====================
 tgt-cr: 0.45
-pred-cr: 0.67
+pred-cr: 0.60
 
 ==================== Token F1-Score: ====================
-f1-score: 0.653
+f1-score: 0.656
 
 ==================== ROUGE F1-Scores: ====================
-rouge1: 0.6437
-rouge2: 0.4911
-rougeL: 0.6406
+rouge1: 0.6508
+rouge2: 0.4906
+rougeL: 0.6478
 
 ==================== ROUGE Recall: ====================
-rouge1: 0.8631
-rouge2: 0.6824
-rougeL: 0.8590
+rouge1: 0.8162
+rouge2: 0.6349
+rougeL: 0.8125
 
 python bin/evaluate.py \
 	--model-dir data/models/all \
 	--device cpu \
 	--dataset data/test-data/duc2004.jsonl \
 	--max-chars 75 \
-	--pred-round 1
+	--pred-round 5
 ====================================================================================================
 RESULTS:
 ==================== Length (#tokens): ====================
 src-len: 32.93
 tgt-len: 11.86
-pred-len: 11.81
+pred-len: 11.42
 
 ==================== Compression ratio: ====================
 tgt-cr: 0.41
-pred-cr: 0.39
+pred-cr: 0.38
 
 ==================== Token F1-Score: ====================
-f1-score: 0.182
+f1-score: 0.185
 
 ==================== ROUGE F1-Scores: ====================
-rouge1: 0.2339
-rouge2: 0.0728
-rougeL: 0.2036
+rouge1: 0.2385
+rouge2: 0.0750
+rougeL: 0.2086
 
 ==================== ROUGE Recall: ====================
-rouge1: 0.2469
-rouge2: 0.0778
-rougeL: 0.2151
+rouge1: 0.2482
+rouge2: 0.0789
+rougeL: 0.2172
 
 python bin/evaluate.py \
 	--model-dir data/models/all \
 	--device cpu \
 	--dataset data/test-data/gigaword.jsonl \
 	--pretokenized \
-	--pred-round 1
+	--pred-round 5
 ====================================================================================================
 RESULTS:
 ==================== Length (#tokens): ====================
 src-len: 29.70
 tgt-len: 8.79
-pred-len: 16.05
+pred-len: 13.96
 
 ==================== Compression ratio: ====================
 tgt-cr: 0.40
-pred-cr: 0.57
+pred-cr: 0.50
 
 ==================== Token F1-Score: ====================
 f1-score: 0.241
 
 ==================== ROUGE F1-Scores: ====================
-rouge1: 0.2868
-rouge2: 0.0985
-rougeL: 0.2511
+rouge1: 0.2864
+rouge2: 0.0979
+rougeL: 0.2529
 
 ==================== ROUGE Recall: ====================
-rouge1: 0.4138
-rouge2: 0.1464
-rougeL: 0.3617
+rouge1: 0.3822
+rouge2: 0.1347
+rougeL: 0.3373
 
 python bin/evaluate.py \
 	--model-dir data/models/all \
 	--device cpu \
 	--dataset data/test-data/broadcast.jsonl \
 	--pretokenized \
-	--pred-round 1
+	--pred-round 5
 ====================================================================================================
 RESULTS:
 ==================== Length (#tokens): ====================
 src-len: 19.82
 tgt-len: 14.37
-pred-len: 11.98
+pred-len: 10.48
 
 ==================== Compression ratio: ====================
 tgt-cr: 0.76
-pred-cr: 0.70
+pred-cr: 0.64
 
 ==================== Token F1-Score: ====================
-f1-score: 0.737
+f1-score: 0.702
 
 ==================== ROUGE F1-Scores: ====================
-rouge1: 0.7432
-rouge2: 0.5042
-rougeL: 0.7392
+rouge1: 0.7094
+rouge2: 0.4696
+rougeL: 0.7059
 
 ==================== ROUGE Recall: ====================
-rouge1: 0.7371
-rouge2: 0.5063
-rougeL: 0.7331
+rouge1: 0.6778
+rouge2: 0.4540
+rougeL: 0.6746
 
 python bin/evaluate.py \
 	--model-dir data/models/all \
 	--device cpu \
 	--dataset data/test-data/bnc.jsonl \
 	--pretokenized \
-	--pred-round 1
+	--pred-round 5
 ====================================================================================================
 RESULTS:
 ==================== Length (#tokens): ====================
 src-len: 27.86
 tgt-len: 19.29
-pred-len: 15.61
+pred-len: 13.00
 
 ==================== Compression ratio: ====================
 tgt-cr: 0.72
-pred-cr: 0.63
+pred-cr: 0.54
 
 ==================== Token F1-Score: ====================
-f1-score: 0.702
+f1-score: 0.651
 
 ==================== ROUGE F1-Scores: ====================
-rouge1: 0.7111
-rouge2: 0.4730
-rougeL: 0.7051
+rouge1: 0.6644
+rouge2: 0.4314
+rougeL: 0.6595
 
 ==================== ROUGE Recall: ====================
-rouge1: 0.6992
-rouge2: 0.4698
-rougeL: 0.6935
+rouge1: 0.6201
+rouge2: 0.4082
+rougeL: 0.6159
 

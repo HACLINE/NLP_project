@@ -3,22 +3,80 @@ RESULTS:
 ==================== Length (#tokens): ====================
 src-len: 26.95
 tgt-len: 11.01
-pred-len: 22.09
+pred-len: 21.46
 
 ==================== Compression ratio: ====================
 tgt-cr: 0.45
-pred-cr: 0.83
+pred-cr: 0.81
 
 ==================== Token F1-Score: ====================
 f1-score: 0.617
 
 ==================== ROUGE F1-Scores: ====================
-rouge1: 0.6058
-rouge2: 0.4741
-rougeL: 0.6021
+rouge1: 0.6056
+rouge2: 0.4687
+rougeL: 0.6024
 
 ==================== ROUGE Recall: ====================
-rouge1: 0.9290
-rouge2: 0.7581
-rougeL: 0.9231
+rouge1: 0.9144
+rouge2: 0.7380
+rougeL: 0.9095
+
+python bin/evaluate.py \
+	--model-dir data/models/all \
+	--device cuda \
+	--dataset data/test-data/google.jsonl \
+	--pred-round 5 
+====================================================================================================
+RESULTS:
+==================== Length (#tokens): ====================
+src-len: 26.95
+tgt-len: 11.01
+pred-len: 15.15
+
+==================== Compression ratio: ====================
+tgt-cr: 0.45
+pred-cr: 0.60
+
+==================== Token F1-Score: ====================
+f1-score: 0.655
+
+==================== ROUGE F1-Scores: ====================
+rouge1: 0.6484
+rouge2: 0.4887
+rougeL: 0.6452
+
+==================== ROUGE Recall: ====================
+rouge1: 0.8143
+rouge2: 0.6330
+rougeL: 0.8103
+
+python bin/evaluate.py \
+	--model-dir data/models/all \
+	--device cuda \
+	--dataset data/test-data/google.jsonl \
+	--pred-round 1 
+====================================================================================================
+RESULTS:
+==================== Length (#tokens): ====================
+src-len: 26.95
+tgt-len: 11.01
+pred-len: 17.26
+
+==================== Compression ratio: ====================
+tgt-cr: 0.45
+pred-cr: 0.67
+
+==================== Token F1-Score: ====================
+f1-score: 0.655
+
+==================== ROUGE F1-Scores: ====================
+rouge1: 0.6453
+rouge2: 0.4937
+rougeL: 0.6425
+
+==================== ROUGE Recall: ====================
+rouge1: 0.8656
+rouge2: 0.6866
+rougeL: 0.8619
 

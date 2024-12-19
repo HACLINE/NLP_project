@@ -3,22 +3,22 @@ RESULTS:
 ==================== Length (#tokens): ====================
 src-len: 26.95
 tgt-len: 11.01
-pred-len: 23.84
+pred-len: 23.53
 
 ==================== Compression ratio: ====================
 tgt-cr: 0.45
-pred-cr: 0.89
+pred-cr: 0.88
 
 ==================== Token F1-Score: ====================
-f1-score: 0.610
+f1-score: 0.611
 
 ==================== ROUGE F1-Scores: ====================
-rouge1: 0.6008
-rouge2: 0.4897
-rougeL: 0.5987
+rouge1: 0.6010
+rouge2: 0.4874
+rougeL: 0.5991
 
 ==================== ROUGE Recall: ====================
-rouge1: 0.9643
-rouge2: 0.8188
-rougeL: 0.9608
+rouge1: 0.9579
+rouge2: 0.8093
+rougeL: 0.9546
 

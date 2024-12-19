@@ -2,13 +2,13 @@
     "loader": "loaders/gigaword.py",
     "dataset": "data/train-data/gigaword",
     "indices": "data/train-data/gigaword/indices.npy",
-    "model_dir": "data/models/Hybridhalf",
-    "model_name": "HybridCritic",
+    "model_dir": "data/models/half2",
+    "model_name": "ActorCritic",
     "verbose": false,
     "use_wandb": true,
     "wandb": {
         "project": "scrl",
-        "name": "Hybridhalf"
+        "name": "half2"
     },
     "use_tb": true,
     "print_every": 1,
@@ -16,7 +16,7 @@
     "save_every": 10,
     "max_val_steps": 512,
     "max_train_seconds": null,
-    "max_train_steps": 8000,
+    "max_train_steps": 10000,
     "batch_size": 4,
     "learning_rate": 1e-05,
     "loss": "pgb",
@@ -29,12 +29,12 @@
             "max_score": 40.0,
             "norm": "max"
         },
-        "SentenceSimilarityReward": {
+        "BiEncoderSimilarity": {
             "weight": 1,
             "model_id": "./all-distilroberta-v1/"
         },
         "GaussianCR": {
-            "weight": 2,
+            "weight": 7.5,
             "mean": 0.45,
             "std": 0.3
         },
@@ -43,8 +43,10 @@
         },
         "NoDaysReward":{
             "weight": 1
+        },
+        "SentenceSimilarityReward":{
+            "weight": 1
         }
-
     }, 
     "model_kwargs": {
         "k_samples": 100,

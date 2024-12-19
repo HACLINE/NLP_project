@@ -8,24 +8,24 @@ RESULTS:
 ==================== Length (#tokens): ====================
 src-len: 26.95
 tgt-len: 11.01
-pred-len: 17.28
+pred-len: 17.17
 
 ==================== Compression ratio: ====================
 tgt-cr: 0.45
 pred-cr: 0.67
 
 ==================== Token F1-Score: ====================
-f1-score: 0.653
+f1-score: 0.654
 
 ==================== ROUGE F1-Scores: ====================
-rouge1: 0.6437
-rouge2: 0.4911
-rougeL: 0.6406
+rouge1: 0.6451
+rouge2: 0.4914
+rougeL: 0.6420
 
 ==================== ROUGE Recall: ====================
-rouge1: 0.8631
-rouge2: 0.6824
-rougeL: 0.8590
+rouge1: 0.8617
+rouge2: 0.6803
+rougeL: 0.8577
 
 python bin/evaluate.py \
 	--model-dir data/models/all \
@@ -38,24 +38,24 @@ RESULTS:
 ==================== Length (#tokens): ====================
 src-len: 32.93
 tgt-len: 11.86
-pred-len: 11.81
+pred-len: 11.84
 
 ==================== Compression ratio: ====================
 tgt-cr: 0.41
-pred-cr: 0.39
+pred-cr: 0.40
 
 ==================== Token F1-Score: ====================
-f1-score: 0.182
+f1-score: 0.183
 
 ==================== ROUGE F1-Scores: ====================
-rouge1: 0.2339
-rouge2: 0.0728
-rougeL: 0.2036
+rouge1: 0.2345
+rouge2: 0.0740
+rougeL: 0.2039
 
 ==================== ROUGE Recall: ====================
-rouge1: 0.2469
-rouge2: 0.0778
-rougeL: 0.2151
+rouge1: 0.2479
+rouge2: 0.0791
+rougeL: 0.2158
 
 python bin/evaluate.py \
 	--model-dir data/models/all \
@@ -68,7 +68,7 @@ RESULTS:
 ==================== Length (#tokens): ====================
 src-len: 29.70
 tgt-len: 8.79
-pred-len: 16.05
+pred-len: 16.04
 
 ==================== Compression ratio: ====================
 tgt-cr: 0.40
@@ -78,14 +78,14 @@ pred-cr: 0.57
 f1-score: 0.241
 
 ==================== ROUGE F1-Scores: ====================
-rouge1: 0.2868
-rouge2: 0.0985
-rougeL: 0.2511
+rouge1: 0.2877
+rouge2: 0.0991
+rougeL: 0.2520
 
 ==================== ROUGE Recall: ====================
-rouge1: 0.4138
-rouge2: 0.1464
-rougeL: 0.3617
+rouge1: 0.4146
+rouge2: 0.1471
+rougeL: 0.3626
 
 python bin/evaluate.py \
 	--model-dir data/models/all \
@@ -98,24 +98,24 @@ RESULTS:
 ==================== Length (#tokens): ====================
 src-len: 19.82
 tgt-len: 14.37
-pred-len: 11.98
+pred-len: 11.96
 
 ==================== Compression ratio: ====================
 tgt-cr: 0.76
 pred-cr: 0.70
 
 ==================== Token F1-Score: ====================
-f1-score: 0.737
+f1-score: 0.738
 
 ==================== ROUGE F1-Scores: ====================
-rouge1: 0.7432
-rouge2: 0.5042
-rougeL: 0.7392
+rouge1: 0.7434
+rouge2: 0.5030
+rougeL: 0.7394
 
 ==================== ROUGE Recall: ====================
-rouge1: 0.7371
-rouge2: 0.5063
-rougeL: 0.7331
+rouge1: 0.7365
+rouge2: 0.5047
+rougeL: 0.7326
 
 python bin/evaluate.py \
 	--model-dir data/models/all \
@@ -128,7 +128,7 @@ RESULTS:
 ==================== Length (#tokens): ====================
 src-len: 27.86
 tgt-len: 19.29
-pred-len: 15.61
+pred-len: 15.60
 
 ==================== Compression ratio: ====================
 tgt-cr: 0.72
@@ -138,12 +138,17 @@ pred-cr: 0.63
 f1-score: 0.702
 
 ==================== ROUGE F1-Scores: ====================
-rouge1: 0.7111
-rouge2: 0.4730
-rougeL: 0.7051
+rouge1: 0.7115
+rouge2: 0.4750
+rougeL: 0.7056
 
 ==================== ROUGE Recall: ====================
-rouge1: 0.6992
-rouge2: 0.4698
-rougeL: 0.6935
+rouge1: 0.7000
+rouge2: 0.4726
+rougeL: 0.6944
 
+python bin/evaluate.py \
+	--model-dir data/models/all \
+	--device cpu \
+	--dataset data/test-data/google.jsonl \
+	--pred-round 5 

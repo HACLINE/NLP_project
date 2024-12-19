@@ -1,5 +1,5 @@
 python bin/evaluate.py \
-	--checkpoint data/models/half-compress/checkpoints \
+	--model-dir data/models/all \
 	--device cpu \
 	--dataset data/test-data/google.jsonl \
 	--pred-round 1 

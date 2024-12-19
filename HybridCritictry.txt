@@ -2,28 +2,28 @@ python bin/evaluate.py \
 	--model-dir data/models/all \
 	--device cuda \
 	--dataset data/test-data/google.jsonl \
-	--pred-round 1 
+	--pred-round 5 
 ====================================================================================================
 RESULTS:
 ==================== Length (#tokens): ====================
 src-len: 26.95
 tgt-len: 11.01
-pred-len: 17.23
+pred-len: 15.11
 
 ==================== Compression ratio: ====================
 tgt-cr: 0.45
-pred-cr: 0.67
+pred-cr: 0.60
 
 ==================== Token F1-Score: ====================
-f1-score: 0.652
+f1-score: 0.653
 
 ==================== ROUGE F1-Scores: ====================
-rouge1: 0.6434
-rouge2: 0.4906
-rougeL: 0.6404
+rouge1: 0.6493
+rouge2: 0.4904
+rougeL: 0.6462
 
 ==================== ROUGE Recall: ====================
-rouge1: 0.8613
-rouge2: 0.6806
-rougeL: 0.8574
+rouge1: 0.8146
+rouge2: 0.6346
+rougeL: 0.8106
 

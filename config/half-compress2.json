@@ -16,7 +16,7 @@
     "save_every": 10,
     "max_val_steps": 512,
     "max_train_seconds": null,
-    "max_train_steps": 3000,
+    "max_train_steps": 8000,
     "batch_size": 4,
     "learning_rate": 1e-05,
     "loss": "pgb",

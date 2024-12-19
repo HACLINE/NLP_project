@@ -2,13 +2,13 @@
     "loader": "loaders/gigaword.py",
     "dataset": "data/train-data/gigaword",
     "indices": "data/train-data/gigaword/indices.npy",
-    "model_dir": "data/models/Hybridhalf",
+    "model_dir": "data/models/half-compress5",
     "model_name": "HybridCritic",
     "verbose": false,
     "use_wandb": true,
     "wandb": {
         "project": "scrl",
-        "name": "Hybridhalf"
+        "name": "half-compress5"
     },
     "use_tb": true,
     "print_every": 1,
@@ -23,28 +23,23 @@
     "encoder_model_id": "./distilroberta-base/",
     "rewards": {
         "Fluency": {
-            "weight": 1,
+            "weight": 3,
             "type": "masked",
             "model_id": "./distilroberta-base/",
             "max_score": 40.0,
             "norm": "max"
         },
-        "SentenceSimilarityReward": {
-            "weight": 1,
-            "model_id": "./all-distilroberta-v1/"
-        },
         "GaussianCR": {
-            "weight": 2,
+            "weight": 3,
             "mean": 0.45,
             "std": 0.3
         },
         "NLIReward":{
-            "weight": 1
+            "weight": 2
         },
-        "NoDaysReward":{
+        "SentenceSimilarityReward":{
             "weight": 1
         }
-
     }, 
     "model_kwargs": {
         "k_samples": 100,
